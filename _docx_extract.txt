@@ -1,0 +1,388 @@
+
+Название
+Сортировка списка фильмов и сериалов по рейтингу зрителей и кинокритиков.
+Цель
+Дать пользователям возможность сортировать список фильмов и сериалов в разделе «Библиотека» по рейтингу зрителей и/или рейтингу кинокритиков 
+Требование
+Пользователь должен иметь возможность выбрать в интерфейсе параметр сортировки (rating или criticsRating) и направление сортировки (asc / desc), после чего получить отсортированный список контента 
+UseCase
+В разделе «Библиотека» пользователь видит список фильмов и сериалов.
+Пользователь в интерфейсе выбирает параметры, по которым он хочет отфильтровать список фильмов и сериалов, и/или режим сортировки.
+Система возвращает список фильмов и сериалов, отфильтрованный и отсортированный согласно указанным данным. При сортировке по рейтингу кинокритиков контент без оценки (criticsRating=null) отображается в конце списка, чтобы обеспечить приоритет контента с валидными оценками.
+Описание изменений
+Необходимо доработать Films Server API.
+1.1. В ответ {{FilmsServer}}/​​films/list добавить новое поле criticsRating.
+1.2. В ответ {{FilmsServer}}/​​films добавить новое поле criticsRating.
+Необходимо доработать Series Server API.
+             2.1.  В ответ {{SeriesServer}}/series/list добавить новое поле criticsRating. 
+             2.2. В ответ {{SeriesServer}}/series добавить новое поле criticsRating.
+Необходимо доработать Web Server API.
+            3.1. В запрос GET /content/list добавить query-параметры sortBy и direction, реализовать сортировку объединенного списка с учетом правила размещения элементов с null в конце. 
+           3.2. В ответ {{WebServer}}/content/list добавить новое поле criticsRating.
+Контекст
+В ответе запроса {{FilmsServer}}/films/list и {{SeriesServer}}/series/list уже есть рейтинг зрителей rating, по которому так же нужно будет выполнять сортировку. 
+
+
+Операции Films Server API
+
+1.1. В ответ {{FilmsServer}}/​​films/list необходимо добавить новое опциональное поле criticsRating. Поле должно заполняться данными о рейтинге кинокритиков.
+
+Тип метода
+GET
+URL запроса
+/films/list
+Параметры запроса 
+- 
+Пример запроса
+https://2ee4902e-6893-4bf2-9b6f-88b9f5fcb78a.mock.pstmn.io/films/list
+Элементы тела запроса
+-
+Пример ответа
+[   
+   {
+       &quot;id&quot;: 101,
+       &quot;type&quot;: &quot;film&quot;,
+       &quot;title&quot;: &quot;Хосэ Каньон&quot;,
+       &quot;description&quot;: &quot;Хосэ Каньон — добрый и открытый парень — устроился в офис электриком и рассказывает коллегам историю своей необыкновенной жизни.&quot;,
+       &quot;imageUrl&quot;: &quot;https://otium.imagestorage.ru/JoseCanyon.img&quot;,
+       &quot;previewUrl&quot;: &quot;https://otium.previewstorage.ru/JoseCanyon.mov&quot;,
+       &quot;recordUrl&quot;: &quot;https://otium.recordstorage.ru/JoseCanyon.mov&quot;,
+       &quot;genre&quot;: [
+           &quot;comedy&quot;
+       ],
+       &quot;recommended&quot;: true,
+       &quot;details&quot;: {
+           &quot;yearOfIssue&quot;: &quot;1995&quot;,
+           &quot;duration&quot;: 152,
+           &quot;country&quot;: [
+               &quot;США&quot;
+           ],
+           &quot;ageRate&quot;: &quot;16+&quot;
+       },
+       &quot;rating&quot;: 9.4,
+       &quot;criticsRating&quot;: 7.4
+   }
+]
+Элементы ответа, которые нужно добавить
+criticsRating 
+number (decimal) / null
+Опционально 
+Рейтинг кинокритиков. Диапазон значений: от 0.0 до 10.0. Может быть null, если оценка кинокритиков отсутствует.  Пример: 7.4 
+Ошибки
+Изменения не требуются
+
+
+1.2. В ответ {{FilmsServer}}/​​films в объект с описанием фильма необходимо добавить новое опциональное поле criticsRating. Поле должно заполняться данными о рейтинге кинокритиков.
+
+Тип метода
+GET
+URL запроса
+/films
+Параметры запроса 
+Изменения не требуются
+Пример запроса
+https://2ee4902e-6893-4bf2-9b6f-88b9f5fcb78a.mock.pstmn.io/films?id=101
+Элементы тела запроса
+-
+Пример ответа
+{
+       &quot;id&quot;: 101,
+       &quot;type&quot;: &quot;film&quot;,
+       &quot;title&quot;: &quot;Хосэ Каньон&quot;,
+       &quot;description&quot;: &quot;Хосэ Каньон — добрый и открытый парень — устроился в офис электриком и рассказывает коллегам историю своей необыкновенной жизни.&quot;,
+       &quot;imageUrl&quot;: &quot;https://otium.imagestorage.ru/JoseCanyon.img&quot;,
+       &quot;previewUrl&quot;: &quot;https://otium.previewstorage.ru/JoseCanyon.mov&quot;,
+       &quot;recordUrl&quot;: &quot;https://otium.recordstorage.ru/JoseCanyon.mov&quot;,
+       &quot;genre&quot;: [
+           &quot;comedy&quot;
+       ],
+       &quot;recommended&quot;: true,
+       &quot;details&quot;: {
+           &quot;yearOfIssue&quot;: &quot;1995&quot;,
+           &quot;duration&quot;: 152,
+           &quot;country&quot;: [
+               &quot;США&quot;
+           ],
+           &quot;ageRate&quot;: &quot;16+&quot;
+       },
+       &quot;language&quot;: {
+           &quot;original&quot;: [
+               &quot;английский&quot;
+           ],
+           &quot;sound&quot;: [
+               &quot;русский&quot;,
+               &quot;английский&quot;
+           ],
+           &quot;subtitle&quot;: [
+               &quot;русский&quot;,
+               &quot;английский&quot;
+           ]
+       },
+       &quot;team&quot;: {
+           &quot;cast&quot;: [
+               &quot;Джон Джэксон&quot;,
+               &quot;Джулия Блэйк&quot;
+           ],
+           &quot;dubbingTeam&quot;: [
+               &quot;Дэвид Браун&quot;
+           ]
+       },
+       &quot;rating&quot;: 9.4,
+       &quot;criticsRating&quot;: 7.4
+   }
+Элементы ответа, которые нужно добавить
+criticsRating 
+number (decimal) / null
+Опционально 
+Рейтинг кинокритиков. Диапазон значений: от 0.0 до 10.0. Может быть null, если оценка кинокритиков отсутствует. Пример: 7.4 
+Ошибки
+Изменения не требуются
+
+
+Операции Series Server API
+
+2.1. В ответ {{SeriesServer}}/​​series/list необходимо добавить новое опциональное поле criticsRating. Поле должно заполняться данными о рейтинге кинокритиков. 
+
+Тип метода
+GET
+URL запроса
+/series/list
+Параметры запроса 
+- 
+Пример запроса
+https://2ee4902e-6893-4bf2-9b6f-88b9f5fcb78a.mock.pstmn.io/series/list
+Элементы тела запроса
+-
+Пример ответа
+[
+  {
+    &quot;id&quot;: 201,
+    &quot;type&quot;: &quot;series&quot;,
+    &quot;title&quot;: &quot;Индийский океан и я&quot;,
+    &quot;description&quot;: &quot;Погрузитесь в веселые приключения на берегу Индийского океана, где дети вместе с местными животными учатся ценить природу и дружбу.&quot;,
+    &quot;imageUrl&quot;: &quot;https://otium.imagestorage.ru/IndianOcean&amp;I.img&quot;,
+    &quot;previewUrl&quot;: &quot;https://otium.previewstorage.ru/IndianOcean&amp;I.mov&quot;,
+    &quot;recordUrl&quot;: &quot;https://otium.recordstorage.ru/IndianOcean&amp;I.mov&quot;,
+    &quot;genre&quot;: [&quot;kids&quot;],
+    &quot;recommended&quot;: false,
+    &quot;details&quot;: {
+      &quot;yearOfIssue&quot;: &quot;2015&quot;,
+      &quot;episodesCount&quot;: 4,
+      &quot;country&quot;: [&quot;Индонезия&quot;],
+      &quot;ageRate&quot;: &quot;6+&quot;
+    },
+    &quot;rating&quot;: 9.5,
+    &quot;criticsRating&quot;: 8.4
+  }
+]
+Элементы ответа, которые нужно добавить
+criticsRating 
+number (decimal) / null
+Опционально 
+Рейтинг кинокритиков. Диапазон значений: от 0.0 до 10.0. Может быть null, если оценка кинокритиков отсутствует. Пример: 8.4 
+Ошибки
+Изменения не требуются
+
+
+
+
+
+2.2. В ответ {{SeriesServer}}/series в объект с описанием сериала необходимо добавить новое опциональное поле criticsRating. Поле должно заполняться данными о рейтинге кинокритиков. 
+
+
+Тип метода
+GET
+URL запроса
+/series
+Параметры запроса 
+Изменения не требуются 
+Пример запроса
+https://2ee4902e-6893-4bf2-9b6f-88b9f5fcb78a.mock.pstmn.io/series?id=201 
+Элементы тела запроса
+-
+Пример ответа
+{
+  &quot;id&quot;: 201,
+  &quot;type&quot;: &quot;series&quot;,
+  &quot;title&quot;: &quot;Индийский океан и я&quot;,
+  &quot;description&quot;: &quot;Погрузитесь в веселые приключения на берегу Индийского океана, где дети вместе с местными животными учатся ценить природу и дружбу.&quot;,
+  &quot;imageUrl&quot;: &quot;https://otium.imagestorage.ru/IndianOcean&amp;I.img&quot;,
+  &quot;previewUrl&quot;: &quot;https://otium.previewstorage.ru/IndianOcean&amp;I.mov&quot;,
+  &quot;recordUrl&quot;: &quot;https://otium.recordstorage.ru/IndianOcean&amp;I.mov&quot;,
+  &quot;genre&quot;: [&quot;kids&quot;],
+  &quot;recommended&quot;: false,
+  &quot;details&quot;: {
+    &quot;yearOfIssue&quot;: &quot;2015&quot;,
+    &quot;episodesCount&quot;: 4,
+    &quot;country&quot;: [&quot;Индонезия&quot;],
+    &quot;ageRate&quot;: &quot;6+&quot;
+  },
+  &quot;language&quot;: {
+    &quot;original&quot;: [&quot;индонезийский&quot;],
+    &quot;sound&quot;: [&quot;русский&quot;],
+    &quot;subtitle&quot;: [&quot;русский&quot;]
+  },
+  &quot;rating&quot;: 9.5,
+  &quot;criticsRating&quot;: 8.4
+}
+Элементы ответа, которые нужно добавить
+criticsRating 
+number (decimal) / null
+Опционально 
+Рейтинг кинокритиков. Диапазон значений: от 0.0 до 10.0. Может быть null, если оценка кинокритиков отсутствует.  Пример: 8.4 
+Ошибки
+Изменения не требуются
+
+
+
+
+
+Операции Web Server API
+
+3.1. В запрос GET /content/list  добавить два query-параметра: sortBy и direction. 
+Поле sortBy может принимать два значения:
+Если “sortBy”: “rating”, внутри массива сортировка элементов должна выполняться по полю rating (рейтинг зрителей); 
+Если “sortBy”: “criticsRating”,  внутри массива сортировка элементов должна выполняться по полю criticsRating (рейтинг кинокритиков). 
+Поле direction может принимать два значения:
+Если “direction”: “desc”, внутри массива элементы должны сортироваться по параметру sortBy по убыванию;
+Если “direction”: “asc”, внутри массива элементы должны сортироваться по параметру sortBy по возрастанию.
+Особые правила сортировки:
+При sortBy=criticsRating элементы с criticsRating = null (или без этого поля) всегда отображаются в конце списка, независимо от значения direction (asc или desc).
+Сначала сортируются только элементы с заполненным criticsRating; затем в конец добавляются все элементы с criticsRating = null в исходном порядке (стабильная сортировка).
+При sortBy=rating аналогичное правило применяется к элементам с rating = null (или без этого поля): такие элементы всегда размещаются в конце списка.
+
+
+Тип метода
+GET
+URL запроса
+/content/list
+Параметры запроса, которые нужно добавить
+sortBy 
+string 
+Опционально 
+Параметр сортировки. Допустимые значения: rating — сортировка по рейтингу зрителей; criticsRating — сортировка по рейтингу кинокритиков. Если параметр не передан, сортировка не применяется 
+
+direction 
+string 
+Опционально 
+Направление сортировки. Допустимые значения: asc — по возрастанию; desc — по убыванию. Используется совместно с sortBy. Если sortBy не передан, параметр игнорируется. Не влияет на порядок элементов с null — они всегда в конце списка 
+Пример запроса
+https://2ee4902e-6893-4bf2-9b6f-88b9f5fcb78a.mock.pstmn.io/content/list?sortBy=rating&amp;direction=desc
+Элементы тела запроса
+-
+Пример ответа
+  [
+  {
+    &quot;id&quot;: 201,
+    &quot;type&quot;: &quot;series&quot;,
+    &quot;title&quot;: &quot;Индийский океан и я&quot;,
+    &quot;description&quot;: &quot;Погрузитесь в веселые приключения на берегу Индийского океана, где дети вместе с местными животными учатся ценить природу и дружбу.&quot;,
+    &quot;imageUrl&quot;: &quot;https://otium.imagestorage.ru/IndianOcean&amp;I.img&quot;,
+    &quot;previewUrl&quot;: &quot;https://otium.previewstorage.ru/IndianOcean&amp;I.mov&quot;,
+    &quot;recordUrl&quot;: &quot;https://otium.recordstorage.ru/IndianOcean&amp;I.mov&quot;,
+    &quot;genre&quot;: [&quot;kids&quot;],
+    &quot;recommended&quot;: false,
+    &quot;details&quot;: {
+      &quot;yearOfIssue&quot;: &quot;2015&quot;,
+      &quot;episodesCount&quot;: 4,
+      &quot;country&quot;: [&quot;Индонезия&quot;],
+      &quot;ageRate&quot;: &quot;6+&quot;
+    },
+    &quot;rating&quot;: 9.5,
+    &quot;criticsRating&quot;: 8.4
+  },
+  {
+    &quot;id&quot;: 101,
+    &quot;type&quot;: &quot;film&quot;,
+    &quot;title&quot;: &quot;Хосэ Каньон&quot;,
+    &quot;description&quot;: &quot;Хосэ Каньон — добрый и открытый парень — устроился в офис электриком и рассказывает коллегам историю своей необыкновенной жизни.&quot;,
+    &quot;imageUrl&quot;: &quot;https://otium.imagestorage.ru/JoseCanyon.img&quot;,
+    &quot;previewUrl&quot;: &quot;https://otium.previewstorage.ru/JoseCanyon.mov&quot;,
+    &quot;recordUrl&quot;: &quot;https://otium.recordstorage.ru/JoseCanyon.mov&quot;,
+    &quot;genre&quot;: [&quot;comedy&quot;],
+    &quot;recommended&quot;: true,
+    &quot;details&quot;: {
+      &quot;yearOfIssue&quot;: &quot;1995&quot;,
+      &quot;duration&quot;: 152,
+      &quot;country&quot;: [&quot;США&quot;],
+      &quot;ageRate&quot;: &quot;16+&quot;
+    },
+    &quot;rating&quot;: 9.4,
+    &quot;criticsRating&quot;: 7.4
+  },
+  {
+    &quot;id&quot;: 104,
+    &quot;type&quot;: &quot;film&quot;,
+    &quot;title&quot;: &quot;Ребус Атлантиды&quot;,
+    &quot;description&quot;: &quot;Археолога подозревают в преступлении, которого он не совершал.&quot;,
+    &quot;imageUrl&quot;: &quot;https://otium.imagestorage.ru/RebusOfAtlantis.img&quot;,
+    &quot;previewUrl&quot;: &quot;https://otium.previewstorage.ru/RebusOfAtlantis.mov&quot;,
+    &quot;recordUrl&quot;: &quot;https://otium.recordstorage.ru/RebusOfAtlantis.mov&quot;,
+    &quot;genre&quot;: [&quot;action&quot;],
+    &quot;recommended&quot;: true,
+    &quot;details&quot;: {
+      &quot;yearOfIssue&quot;: &quot;2007&quot;,
+      &quot;duration&quot;: 159,
+      &quot;country&quot;: [&quot;Великобритания&quot;, &quot;Турция&quot;, &quot;США&quot;],
+      &quot;ageRate&quot;: &quot;12+&quot;
+    },
+    &quot;rating&quot;: 7.3,
+    &quot;criticsRating&quot;: 6.1
+  },
+  {
+    &quot;id&quot;: 102,
+    &quot;type&quot;: &quot;film&quot;,
+    &quot;title&quot;: &quot;Вестибюль&quot;,
+    &quot;description&quot;: &quot;Александр Павловски оказался на международном вокзале Буэнос-Айреса с паспортом другого человека.&quot;,
+    &quot;imageUrl&quot;: &quot;https://otium.imagestorage.ru/TheLobby.img&quot;,
+    &quot;previewUrl&quot;: &quot;https://otium.previewstorage.ru/TheLobby.mov&quot;,
+    &quot;recordUrl&quot;: &quot;https://otium.recordstorage.ru/TheLobby.mov&quot;,
+    &quot;genre&quot;: [&quot;drama&quot;],
+    &quot;recommended&quot;: true,
+    &quot;details&quot;: {
+      &quot;yearOfIssue&quot;: &quot;2005&quot;,
+      &quot;duration&quot;: 134,
+      &quot;country&quot;: [&quot;США&quot;, &quot;Аргентина&quot;],
+      &quot;ageRate&quot;: &quot;12+&quot;
+    },
+    &quot;rating&quot;: 8.9,
+    &quot;criticsRating&quot;: null
+  },
+  {
+    &quot;id&quot;: 103,
+    &quot;type&quot;: &quot;film&quot;,
+    &quot;title&quot;: &quot;В руках тьмы&quot;,
+    &quot;description&quot;: &quot;Учёный Ханс вместе со своей напарницей Анджелой Морэ начинает расследование преступления.&quot;,
+    &quot;imageUrl&quot;: &quot;https://otium.imagestorage.ru/InTheHandsOfDarkness.img&quot;,
+    &quot;previewUrl&quot;: &quot;https://otium.previewstorage.ru/InTheHandsOfDarkness.mov&quot;,
+    &quot;recordUrl&quot;: &quot;https://otium.recordstorage.ru/InTheHandsOfDarkness.mov&quot;,
+    &quot;genre&quot;: [&quot;action&quot;],
+    &quot;recommended&quot;: true,
+    &quot;details&quot;: {
+      &quot;yearOfIssue&quot;: &quot;2010&quot;,
+      &quot;duration&quot;: 143,
+      &quot;country&quot;: [&quot;Италия&quot;, &quot;США&quot;]
+    },
+    &quot;rating&quot;: 6.8,
+    &quot;criticsRating&quot;: null
+  }
+]
+Элементы ответа, которые нужно добавить
+criticsRating 
+number (decimal) 
+Опционально 
+Рейтинг кинокритиков. Диапазон значений: от 0.0 до 10.0. Пробрасывается из ответов Films Server и Series Server. Может быть null. При сортировке по sortBy=criticsRating элементы с null всегда размещаются в конце списка.
+Ошибки: Код 400
+bad input parameter — передано недопустимое значение sortBy (не rating и не criticsRating) или недопустимое значение direction (не asc и не desc) 
+
+3.2. В ответ {{WebServer}}/​​content/list добавить новое поле criticsRating в каждый элемент объединенного списка фильмов и сериалов. Значение поля берется из соответствующих ответов {{FilmsServer}}/films/list и {{SeriesServer}}/series/list и возвращается клиенту для отображения в интерфейсе «Библиотека». 
+
+
+Название параметра
+Тип данных
+Обязательность
+Описание и варианты значений
+criticsRating 
+number (decimal) /null
+Опционально 
+Рейтинг кинокритиков. Диапазон значений: от 0.0 до 10.0. Используется для отображения и сортировки по параметру sortBy=criticsRating. При значении null элемент при сортировке по criticsRating всегда отображается в конце списка. 
